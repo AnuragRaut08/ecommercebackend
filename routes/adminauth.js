@@ -3,7 +3,7 @@ const bcrypt = require('bcrypt');
 const Seller = require('../models/seller'); // Adjust the path to your Seller schema
 const router = express.Router();
 
-// Seller Login
+// Seller Login 
 router.post('/login', async (req, res) => {
   try {
     const { sellerId, emailOrPhone, password } = req.body;
