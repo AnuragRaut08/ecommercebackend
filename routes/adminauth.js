@@ -7,7 +7,7 @@ const router = express.Router();
 router.post('/login', async (req, res) => {
   try {
     const { sellerId, emailOrPhone, password } = req.body;
-
+ 
     // Validate required fields
     if (!sellerId || !emailOrPhone || !password) {
       return res.status(400).json({
