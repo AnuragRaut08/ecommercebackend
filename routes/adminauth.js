@@ -1,6 +1,6 @@
 const express = require('express');
 const bcrypt = require('bcrypt');
-const Seller = require('../models/seller'); // Adjust the path to your Seller schema
+const Seller = require('../models/seller'); // Adjust the path to the Seller schema
 const router = express.Router();
 
 // Seller Login 
