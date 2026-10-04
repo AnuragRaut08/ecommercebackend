@@ -11,16 +11,21 @@ const Seller = require('./models/seller');
 const adminAuthRoutes = require('./routes/adminauth'); 
 const cartRoutes = require('./routes/cart');
 const complaintsRoutes = require('./routes/complaints');
-const couponRoutes = require('./routes/coupon')
+const couponRoutes = require('./routes/coupon');
+const imageRoutes = require("./routes/image");
+const reviewsRoutes = require('./routes/reviews');
+const SEOroutes = require('./routes/seo');
 const Product = require('./models/product');
 const crypto = require('crypto');
+const otpRoutes = require('./routes/otp');
+const orderRoutes = require('./routes/orders');
 require('dotenv').config();
 
 const app = express();
 
 // Middleware
 app.use(cors({
-  origin: ['http://localhost:3000','https://merabestie.com','https://hosteecommerce.vercel.app'], 
+  origin: '*', 
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
@@ -36,7 +41,7 @@ app.use(
     resave: false,
     saveUninitialized: false,
     store: MongoStore.create({
-      mongoUrl: process.env.MONGO_URI,
+      mongoUrl: "mongodb+srv://ecommerce:ecommerce@ecommerce.dunf0.mongodb.net/",
       collectionName: 'sessions',
     }),
     cookie: {
@@ -53,9 +58,14 @@ app.use('/admin', adminAuthRoutes);
 app.use('/cart', cartRoutes);
 app.use('/complaints', complaintsRoutes);
 app.use('/coupon',couponRoutes)
+app.use('/image',imageRoutes)
+app.use('/reviews', reviewsRoutes);
+app.use('/seo', SEOroutes);
+app.use('/otp', otpRoutes);
+app.use('/orders', orderRoutes);
 
 // MongoDB Connection
-const uri = process.env.MONGO_URI;
+const uri = "mongodb+srv://ecommerce:ecommerce@ecommerce.dunf0.mongodb.net/";
 mongoose.connect(uri)
 .then(() => console.log('Connected to MongoDB'))
 .catch(err => console.error('MongoDB connection error:', err));
@@ -114,6 +124,7 @@ app.post('/product/category', async (req, res) => {
 // Create Product Route
 app.post('/create-product', async (req, res) => {
   try {
+    
     const productData = req.body;
     const product = new Product(productData);
     const result = await product.save();
@@ -127,6 +138,36 @@ app.post('/create-product', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Error creating product',
+      error: error.message
+    });
+  }
+});
+
+//delete complete product
+app.post('/delete-product', async (req, res) => {
+  try {
+    const { productId } = req.body;
+
+     // Find product by productId
+     const product = await Product.findOne({ productId });
+
+     if (!product) {
+      return res.status(404).json({
+        success: false,
+        message: 'Product not found'
+      });
+    }
+    const response = await Product.deleteOne({productId})
+    if(response.deletedCount===1&&response.acknowledged===true)
+      return res.status(200).json({
+        success: true,
+        message: 'Product deleted successfully',
+      });
+  } catch (error) {
+    console.log(error)
+    res.status(500).json({
+      success: false,
+      message: 'Error deleting product',
       error: error.message
     });
   }
@@ -241,7 +282,7 @@ app.get('/product/:productId', async (req, res) => {
 // Update Stock Status Route
 app.put('/instock-update', async (req, res) => {
   try {
-    const { productId, price, name, category, inStockValue, soldStockValue } = req.body;
+    const { productId, price, img, name, category, inStockValue, soldStockValue } = req.body;
     // Find and update the product
     const updatedProduct = await Product.findOneAndUpdate(
       { productId: productId }, // Match by productId
@@ -249,6 +290,7 @@ app.put('/instock-update', async (req, res) => {
         $set: {
           name: name,
           price: price,
+          img: img,
           category: category,
           inStockValue: inStockValue,
           soldStockValue: soldStockValue
