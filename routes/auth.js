@@ -92,7 +92,7 @@ router.get('/user/:userId', async (req, res) => {
   });
   
 
-// Seller routes
+// These are Seller routes
 router.post('/seller/signup', async (req, res) => {
   try {
     const { phoneNumber, emailId, password, name, businessName, businessAddress, businessType } = req.body;
